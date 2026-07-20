@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Shift — A2 → B2</title>
+<style>
+  :root{
+    --bg:#12161c;
+    --panel:#1a212b;
+    --panel2:#212a36;
+    --line:#2b3543;
+    --text:#e9edf2;
+    --muted:#8794a3;
+    --amber:#e8a23d;
+    --amber-dim:#7a5a26;
+    --teal:#4fb8a8;
+    --red:#d9695f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:'IBM Plex Sans',-apple-system,'Segoe UI',Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  @font-face{font-family:'IBM Plex Sans';src:local('Arial');}
+  .mono{font-family:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;}
+  a{color:var(--amber);}
+  .wrap{max-width:640px;margin:0 auto;padding:18px 16px 60px;}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .brand{display:flex;flex-direction:column;}
+  .brand .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--amber);text-transform:uppercase;}
+  .brand h1{margin:2px 0 0;font-size:20px;font-weight:600;letter-spacing:-.01em;}
+  .streak{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;}
+  .streak b{color:var(--amber);font-size:15px;}
+
+  /* GAUGE */
+  .gauge-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:16px;}
+  .gauge-svg{flex-shrink:0;}
+  .gauge-info{flex:1;min-width:0;}
+  .gauge-info .lvl-now{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:700;color:var(--amber);letter-spacing:.02em;}
+  .gauge-info .lvl-label{font-size:12px;color:var(--muted);margin-top:2px;}
+  .gauge-info .lvl-bar-track{height:6px;background:var(--panel2);border-radius:4px;margin-top:10px;overflow:hidden;}
+  .gauge-info .lvl-bar-fill{height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));border-radius:4px;transition:width .4s;}
+  .gauge-info .day-count{font-size:11px;color:var(--muted);margin-top:6px;font-family:'IBM Plex Mono',monospace;}
+
+  .ticket{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+  .ticket .head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;}
+  .ticket .head .h-left{display:flex;align-items:center;gap:10px;}
+  .ticket .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:3px 6px;}
+  .ticket h3{margin:0;font-size:15px;font-weight:600;}
+  .ticket .check{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--bg);transition:.2s;}
+  .ticket .check.done{background:var(--teal);border-color:var(--teal);}
+  .ticket .body{padding:0 16px 18px;display:none;border-top:1px solid var(--line);}
+  .ticket .body.open{display:block;padding-top:14px;}
+  .ticket .chevron{color:var(--muted);font-size:12px;margin-left:6px;transition:transform .2s;}
+  .ticket .chevron.open{transform:rotate(180deg);}
+
+  p.small{font-size:13.5px;line-height:1.55;color:var(--text);margin:0 0 10px;}
+  p.small.muted{color:var(--muted);}
+  .ex{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--teal);background:var(--panel2);border-radius:6px;padding:8px 10px;margin:6px 0;}
+  .ex .ru{color:var(--muted);display:block;font-family:'IBM Plex Sans',sans-serif;font-size:12px;margin-top:2px;}
+
+  .practice-item{margin-bottom:10px;}
+  .practice-item .q{font-size:13.5px;margin-bottom:5px;}
+  .practice-item input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 10px;font-size:13.5px;font-family:'IBM Plex Mono',monospace;}
+  .practice-item .ans{font-size:12px;color:var(--teal);margin-top:4px;display:none;}
+  .practice-item .ans.show{display:block;}
+
+  .btn{display:inline-block;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .btn:active{transform:translateY(1px);}
+  .btn.amber{background:var(--amber);border-color:var(--amber);color:#1a1206;font-weight:600;}
+  .btn.ghost{background:transparent;}
+  .row-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+
+  .vocab-grid{display:flex;flex-direction:column;gap:8px;}
+  .vocab-card{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;}
+  .vocab-card .en{font-weight:600;font-size:14px;}
+  .vocab-card .ru{color:var(--amber);font-size:12.5px;margin-left:8px;}
+  .vocab-card .ex{margin-top:6px;}
+
+  textarea{width:100%;min-height:120px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px;font-size:13.5px;font-family:'IBM Plex Sans',sans-serif;line-height:1.5;resize:vertical;}
+  .wc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;}
+  .wc.ok{color:var(--teal);}
+
+  .listen-box{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px;}
+  .tf{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px;}
+  .tf:first-of-type{border-top:none;}
+  .tf-btns button{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:12px;margin-left:5px;cursor:pointer;}
+  .tf-btns button.sel{background:var(--amber);color:#1a1206;border-color:var(--amber);}
+
+  .footer-cta{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(18,22,28,0),var(--bg) 30%);padding:16px 0 0;margin-top:6px;}
+  .complete-btn{width:100%;padding:14px;border-radius:12px;background:var(--muted);color:var(--bg);border:none;font-size:14px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.03em;cursor:not-allowed;}
+  .complete-btn.ready{background:var(--teal);cursor:pointer;}
+
+  .review-flag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--bg);background:var(--amber);border-radius:5px;padding:2px 6px;margin-left:8px;letter-spacing:.06em;}
+  .empty-note{font-size:12px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">English Shift</span>
+      <h1>A2 → B2, по 20-30 мин/день</h1>
+    </div>
+    <div class="streak">🔥 <b id="streakNum">0</b></div>
+  </header>
+
+  <div class="gauge-card">
+    <svg class="gauge-svg" width="110" height="70" viewBox="0 0 110 70">
+      <path d="M10,60 A50,50 0 0,1 100,60" fill="none" stroke="#2b3543" stroke-width="9" stroke-linecap="round"/>
+      <path id="gaugeArc" d="M10,60 A50,50 0 0,1 100,60" fill="none" stroke="#e8a23d" stroke-width="9" stroke-linecap="round" stroke-dasharray="141 141" stroke-dashoffset="141"/>
+      <text x="55" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="16" font-weight="700" fill="#e9edf2" id="gaugeLabel">A2</text>
+    </svg>
+    <div class="gauge-info">
+      <div class="lvl-now" id="lvlNow">A2</div>
+      <div class="lvl-label" id="lvlLabel">Базовый уровень</div>
+      <div class="lvl-bar-track"><div class="lvl-bar-fill" id="lvlBarFill" style="width:0%"></div></div>
+      <div class="day-count" id="dayCount">День 1</div>
+    </div>
+  </div>
+
+  <div id="tickets"></div>
+
+  <div class="footer-cta">
+    <button class="complete-btn" id="completeBtn">Заверши все 4 блока →</button>
+  </div>
+
+  <div class="empty-note">Прогресс хранится в этом браузере на этом устройстве (localStorage).<br>Если перенесёшь файл на другой хостинг/GitHub Pages — прогресс останется отдельным для каждого URL.</div>
+
+</div>
+
+<script>
+/* ================= CURRICULUM DATA ================= */
+const GRAMMAR = [
+{level:"A2",title:"Present Simple vs Present Continuous",exp:"Present Simple — обычные, регулярные действия (I work, she works). Present Continuous — то, что происходит сейчас (I am working).",examples:[["I work at a repair shop every day.","Я работаю в ремонтной мастерской каждый день."],["Right now, I am fixing a washing machine.","Прямо сейчас я чиню стиральную машину."]],practice:[["She usually ___ (drive) to work.","drives"],["Look! The machine ___ (make) a strange noise.","is making"],["We ___ (not / work) on Sundays.","don't work"],["He ___ (talk) on the phone right now.","is talking"]]},
+{level:"A2",title:"Past Simple (regular & irregular verbs)",exp:"Для завершённых действий в прошлом. Правильные глаголы +ed (worked), неправильные меняют форму (go→went).",examples:[["I called the client yesterday.","Я позвонил клиенту вчера."],["He went to the warehouse this morning.","Он ходил на склад сегодня утром."]],practice:[["I ___ (fix) the fridge last week.","fixed"],["She ___ (go) to the store yesterday.","went"],["They ___ (not / call) me back.","didn't call"],["___ you ___ (see) the new part?","Did / see"]]},
+{level:"A2",title:"Countable / Uncountable nouns, some/any",exp:"Countable — можно посчитать (a part, two parts). Uncountable — нельзя (water, information). Some — в утверждениях, any — в вопросах/отрицаниях.",examples:[["I need some information about the model.","Мне нужна информация о модели."],["Do you have any spare parts?","У тебя есть запасные части?"]],practice:[["I don't have ___ time today.","any"],["There are ___ tools in the van.","some"],["Is there ___ water in the tank?","any"],["He gave me ___ good advice.","some"]]},
+{level:"A2",title:"Comparatives and Superlatives",exp:"Comparative — сравнение двух (bigger, more expensive). Superlative — самый (the biggest, the most expensive).",examples:[["This dryer is bigger than that one.","Эта сушилка больше той."],["It's the most expensive part in the shop.","Это самая дорогая деталь в магазине."]],practice:[["This job is ___ (easy) than the last one.","easier"],["That's the ___ (good) technician I know.","best"],["My truck is ___ (fast) than yours.","faster"],["It's the ___ (bad) day this month.","worst"]]},
+{level:"A2",title:"Future: going to vs will",exp:"Going to — план, намерение (I'm going to fix it tomorrow). Will — решение в момент речи, обещание (I'll call you back).",examples:[["I'm going to visit three clients today.","Сегодня я собираюсь посетить трёх клиентов."],["I'll send you the invoice now.","Я вышлю тебе счёт прямо сейчас."]],practice:[["I ___ (call) you back in five minutes. (decision now)","will call"],["We ___ (meet) the client at 3pm. (planned)","are going to meet"],["Look at those clouds — it ___ (rain).","is going to rain"],["I promise I ___ (help) you.","will help"]]},
+{level:"A2",title:"Prepositions of place and time",exp:"In (месяц, город), on (день, дата), at (время, точное место). Также: under, behind, next to, between.",examples:[["The meeting is at 9am on Monday.","Встреча в 9 утра в понедельник."],["The part is under the panel.","Деталь находится под панелью."]],practice:[["I start work ___ 7am.","at"],["My birthday is ___ March.","in"],["The tool box is ___ the truck.","in"],["The switch is ___ the two wires.","between"]]},
+{level:"A2",title:"Modal verbs: can, must, should",exp:"Can — возможность/умение. Must — обязанность. Should — совет.",examples:[["You must wear safety gloves here.","Здесь обязательно нужно носить защитные перчатки."],["You should check the manual first.","Тебе следует сначала проверить инструкцию."]],practice:[["You ___ turn off the power before repair.","must"],["I ___ speak a little English.","can"],["He ___ ask the client for details.","should"],["We ___ not touch this wire.","must"]]},
+{level:"A2",title:"Present Perfect — ever / never / just",exp:"Present Perfect связывает прошлое с настоящим: have/has + 3-я форма глагола. Ever/never — про опыт, just — недавнее действие.",examples:[["Have you ever fixed this model?","Ты когда-нибудь чинил эту модель?"],["I have just finished the report.","Я только что закончил отчёт."]],practice:[["I ___ never ___ (see) this error before.","have / seen"],["She has ___ (just / arrive).","just arrived"],["___ you ever ___ (work) with Sonya AI?","Have / worked"],["We ___ (not / finish) yet.","haven't finished"]]},
+{level:"A2",title:"Articles: a / an / the",exp:"A/an — первое упоминание, один из многих. The — конкретный, уже известный предмет.",examples:[["I need a new part for the compressor.","Мне нужна новая деталь для компрессора."],["The client called about the part I mentioned.","Клиент позвонил насчёт той детали, о которой я упоминал."]],practice:[["I saw ___ old fridge in the yard.","an"],["___ fridge in the yard was broken.","The"],["She is ___ technician.","a"],["Can you send me ___ invoice?","the"]]},
+{level:"A2→B1",title:"Past Continuous",exp:"Was/were + -ing: действие в процессе в определённый момент прошлого, часто прерванное другим.",examples:[["I was driving when the client called.","Я вёл машину, когда позвонил клиент."],["They were waiting when I arrived.","Они ждали, когда я приехал."]],practice:[["I ___ (work) when the power went out.","was working"],["What ___ you ___ (do) at 6pm yesterday?","were / doing"],["She ___ (not / listen) when I explained it.","wasn't listening"],["While I ___ (drive), it started to rain.","was driving"]]},
+{level:"A2→B1",title:"Present Perfect vs Past Simple",exp:"Past Simple — конкретное время в прошлом (yesterday, in 2020). Present Perfect — без точного времени, важен результат.",examples:[["I fixed three fridges yesterday.","Вчера я починил три холодильника."],["I have fixed over 500 fridges in my career.","За карьеру я починил более 500 холодильников."]],practice:[["I ___ (already / finish) the job.","have already finished"],["She ___ (call) me two days ago.","called"],["___ you ever ___ (be) to Fort McMurray?","Have / been"],["He ___ (start) his business in 2023.","started"]]},
+{level:"A2→B1",title:"First Conditional",exp:"If + Present Simple, will + verb — реальная ситуация в будущем.",examples:[["If the part arrives tomorrow, I will fix it.","Если деталь придёт завтра, я её починю."],["If you don't pay, I won't come back.","Если не заплатишь, я не приеду снова."]],practice:[["If it ___ (rain), we will stay inside.","rains"],["I will call you if I ___ (need) help.","need"],["If she ___ (not / answer), leave a message.","doesn't answer"],["We will lose the client if we ___ (be) late.","are"]]},
+{level:"A2→B1",title:"Second Conditional",exp:"If + Past Simple, would + verb — гипотетическая, нереальная или маловероятная ситуация.",examples:[["If I had more technicians, I would take more jobs.","Если бы у меня было больше техников, я бы брал больше заказов."],["If I were you, I would call him now.","На твоём месте я бы позвонил ему сейчас."]],practice:[["If I ___ (have) time, I would help you.","had"],["What would you do if you ___ (lose) your keys?","lost"],["If she ___ (know) English better, she would get the job.","knew"],["I would buy a new van if I ___ (win) the lottery.","won"]]},
+{level:"A2→B1",title:"Reported speech (statements)",exp:"Прямая речь → косвенная: время сдвигается на шаг назад. He said, 'I am busy' → He said (that) he was busy.",examples:[["She said she would call back later.","Она сказала, что перезвонит позже."],["He told me he had fixed the machine.","Он сказал мне, что починил машину."]],practice:[["He said, 'I am tired.' → He said he ___ tired.","was"],["'I will come tomorrow.' → She said she ___ come the next day.","would"],["'I fixed it.' → He said he ___ it.","had fixed"],["'I need help.' → She said she ___ help.","needed"]]},
+{level:"A2→B1",title:"Passive Voice (Present Simple)",exp:"Am/is/are + 3-я форма глагола. Используется, когда важнее действие, чем тот, кто его совершает.",examples:[["The machine is checked every month.","Машину проверяют каждый месяц."],["Parts are ordered from Edmonton.","Детали заказывают из Эдмонтона."]],practice:[["The invoice ___ (send) by email.","is sent"],["These tools ___ (use) every day.","are used"],["The report ___ (write) by the technician.","is written"],["New clients ___ (contact) within 24 hours.","are contacted"]]},
+{level:"A2→B1",title:"Relative clauses: who / which / that",exp:"Who — люди, which — вещи, that — оба (в разговорной речи). Соединяют две мысли в одну.",examples:[["The client who called yesterday needs a new part.","Клиент, который звонил вчера, нуждается в новой детали."],["The part which broke is expensive.","Деталь, которая сломалась, дорогая."]],practice:[["The man ___ fixed my car is very good.","who"],["I lost the tool ___ I bought last week.","that/which"],["This is the shop ___ sells spare parts.","that/which"],["The technician ___ helped me was very polite.","who"]]},
+{level:"A2→B1",title:"Used to",exp:"Used to + verb — привычное действие в прошлом, которое сейчас не происходит.",examples:[["I used to work alone, but now I have a team.","Раньше я работал один, а теперь у меня есть команда."],["We didn't use to have this many clients.","Раньше у нас не было так много клиентов."]],practice:[["I ___ (use to / drive) an old truck.","used to drive"],["She ___ (not / use to / like) her job.","didn't use to like"],["___ you ___ (use to / live) in Kyiv?","Did / use to live"],["He used to ___ (repair) TVs, now he does appliances.","repair"]]},
+{level:"A2→B1",title:"Phrasal verbs (everyday)",exp:"Глагол + предлог с новым значением: turn on/off, look for, get up, break down, run out of.",examples:[["The washing machine broke down again.","Стиральная машина снова сломалась."],["I'm looking for a spare part online.","Я ищу запчасть онлайн."],["We ran out of coolant.","У нас закончился хладагент."]],practice:[["Please ___ off the power before repairing.","turn"],["I need to ___ up early tomorrow.","get"],["He is ___ for a new job.","looking"],["We ___ out of parts last week.","ran"]]},
+{level:"B1",title:"Present Perfect Continuous",exp:"Have/has been + -ing: действие, которое началось в прошлом и продолжается, подчёркивает длительность.",examples:[["I have been working here for ten years.","Я работаю здесь уже десять лет."],["She has been waiting for an hour.","Она ждёт уже час."]],practice:[["I ___ (work) on this project for two weeks.","have been working"],["How long ___ you ___ (learn) English?","have / been learning"],["He ___ (drive) since 6am.","has been driving"],["They ___ (not / call) us all day.","haven't been calling"]]},
+{level:"B1",title:"Past Perfect",exp:"Had + 3-я форма: действие, завершившееся до другого момента в прошлом.",examples:[["When I arrived, he had already fixed the machine.","Когда я приехал, он уже починил машину."],["She had left before I called.","Она уже ушла, когда я позвонил."]],practice:[["I ___ (already / leave) when she arrived.","had already left"],["He was tired because he ___ (work) all night.","had worked"],["We ___ (not / finish) before the client came.","hadn't finished"],["Had you ___ (see) this model before?","seen"]]},
+{level:"B1",title:"Third Conditional",exp:"If + Past Perfect, would have + 3-я форма — гипотетическая ситуация в прошлом (сожаление / упущенная возможность).",examples:[["If I had known, I would have brought the part.","Если бы я знал, я бы привёз деталь."],["She would have called if she had had time.","Она бы позвонила, если бы у неё было время."]],practice:[["If I ___ (have) more time, I would have finished.","had had"],["We would have arrived earlier if we ___ (not / stop).","hadn't stopped"],["If she had asked, I ___ (help) her.","would have helped"],["He wouldn't have broken it if he ___ (be) careful.","had been"]]},
+{level:"B1",title:"Passive Voice (Past Simple)",exp:"Was/were + 3-я форма — прошедшее время в пассиве.",examples:[["The part was ordered last Friday.","Деталь была заказана в прошлую пятницу."],["The report was written by hand.","Отчёт был написан от руки."]],practice:[["The machine ___ (fix) yesterday.","was fixed"],["The tools ___ (steal) last night.","were stolen"],["The invoice ___ (not / send) on time.","wasn't sent"],["___ the part ___ (deliver) on time?","Was / delivered"]]},
+{level:"B1",title:"Gerunds vs Infinitives",exp:"Некоторые глаголы + -ing (enjoy, avoid, finish), другие + to (want, need, decide). Нужно запоминать.",examples:[["I enjoy fixing complicated machines.","Мне нравится чинить сложную технику."],["I need to call the client back.","Мне нужно перезвонить клиенту."]],practice:[["I finished ___ (write) the report.","writing"],["She wants ___ (start) her own business.","to start"],["He avoids ___ (talk) on the phone in English.","talking"],["We decided ___ (buy) a new van.","to buy"]]},
+{level:"B1",title:"Modals of deduction: must / might / can't",exp:"Must — уверен, что это правда. Might/could — возможно. Can't — уверен, что это неправда.",examples:[["The light is off — the fuse must be broken.","Свет не горит — предохранитель, должно быть, сломан."],["It might be a wiring problem.","Возможно, это проблема с проводкой."],["That can't be right, I just checked it.","Это не может быть правдой, я только что проверил."]],practice:[["He isn't answering — he ___ be busy.","must"],["It ___ be the motor, I'm not sure.","might"],["She ___ be at work, I just saw her at home.","can't"],["This ___ be an expensive repair.","might"]]},
+{level:"B1",title:"Question tags",exp:"Короткий вопрос в конце предложения для подтверждения: You work here, don't you?",examples:[["You've fixed this before, haven't you?","Ты уже чинил это раньше, не так ли?"],["It isn't working, is it?","Это же не работает, да?"]],practice:[["You called the client, ___?","didn't you"],["She's the new technician, ___?","isn't she"],["They can't fix it today, ___?","can they"],["This is expensive, ___?","isn't it"]]},
+{level:"B1",title:"Indirect questions",exp:"Вежливая форма вопроса: Could you tell me... / Do you know... + прямой порядок слов (без инверсии).",examples:[["Could you tell me where the office is?","Не могли бы вы сказать, где офис?"],["Do you know when the part will arrive?","Вы знаете, когда придёт деталь?"]],practice:[["Could you tell me ___ (what time / it is)?","what time it is"],["Do you know ___ (where / he lives)?","where he lives"],["I wonder ___ (if / she called).","if she called"],["Can you tell me ___ (how much / it costs)?","how much it costs"]]},
+{level:"B1",title:"Reported speech: questions & commands",exp:"Reported questions без вопросительного порядка слов; reported commands: told + to/not to.",examples:[["He asked me where the tools were.","Он спросил меня, где инструменты."],["She told me to check the wiring.","Она сказала мне проверить проводку."]],practice:[["'Where is the office?' → He asked where the office ___.","was"],["'Check the fuse.' → She told me ___ the fuse.","to check"],["'Don't touch it!' → He told me ___ touch it.","not to"],["'Are you busy?' → She asked if I ___ busy.","was"]]},
+{level:"B1→B2",title:"Mixed Conditionals",exp:"Комбинация условий из разных времён: прошлая причина → настоящий результат, или наоборот.",examples:[["If I had studied English earlier, I would speak it better now.","Если бы я раньше учил английский, я бы сейчас лучше говорил."],["If he were more careful, he wouldn't have broken it.","Если бы он был осторожнее, он бы не сломал это."]],practice:[["If I ___ (be) more organized, I wouldn't have missed the call.","were"],["If she had taken the course, she ___ (speak) fluently now.","would speak"],["If we weren't so busy, we ___ (help) them yesterday.","would have helped"],["If he had fixed it properly, it ___ (work) now.","would work"]]},
+{level:"B1→B2",title:"Passive Voice — full review",exp:"Пассив во всех временах: is done, was done, has been done, will be done, is being done.",examples:[["The part has been ordered.","Деталь уже заказана."],["The machine is being repaired right now.","Машину чинят прямо сейчас."],["The report will be sent tomorrow.","Отчёт будет отправлен завтра."]],practice:[["The invoice ___ (send) already.","has been sent"],["The van ___ (fix) right now.","is being fixed"],["The new website ___ (launch) next month.","will be launched"],["This model ___ (not / produce) anymore.","isn't produced"]]},
+{level:"B1→B2",title:"Advanced relative clauses",exp:"Whose (принадлежность), where (место), non-defining clauses с запятыми (дополнительная информация).",examples:[["The client, whose fridge I fixed, recommended me.","Клиент, чей холодильник я починил, порекомендовал меня."],["Edmonton, where I live, is a big city.","Эдмонтон, где я живу, большой город."]],practice:[["The technician ___ truck broke down called for help.","whose"],["This is the shop ___ I buy my parts.","where"],["My boss, ___ is very strict, liked the report.","who"],["The house ___ roof was damaged needs repair.","whose"]]},
+{level:"B1→B2",title:"Wish / If only",exp:"Wish + Past Simple — сожаление о настоящем. Wish + Past Perfect — сожаление о прошлом.",examples:[["I wish I spoke better English.","Жаль, что я не говорю по-английски лучше."],["I wish I had checked the part before.","Жаль, что я не проверил деталь раньше."]],practice:[["I wish I ___ (have) more free time.","had"],["She wishes she ___ (study) harder at school.","had studied"],["If only I ___ (know) about this job earlier.","had known"],["I wish it ___ (not / rain) today.","weren't raining"]]},
+{level:"B1→B2",title:"Causative (have something done)",exp:"Have/get + object + 3-я форма: кто-то сделал это для тебя. I had my van repaired = мне отремонтировали фургон.",examples:[["I had my truck serviced last week.","Мне обслужили грузовик на прошлой неделе."],["She is getting her website redesigned.","Ей сейчас переделывают сайт."]],practice:[["I ___ (have) the website / build) by a designer.","had / built"],["He is getting his tools ___ (sharpen).","sharpened"],["We had the office ___ (paint) last month.","painted"],["She had her documents ___ (translate).","translated"]]},
+{level:"B1→B2",title:"Inversion for emphasis",exp:"Инверсия после отрицательных наречий: Never, Rarely, Not only... — глагол выходит перед подлежащим.",examples:[["Never have I seen such a complicated repair.","Никогда я не видел такого сложного ремонта."],["Rarely does he arrive late.","Он редко опаздывает."]],practice:[["Never ___ I seen such bad wiring.","have"],["Not only ___ he fix it, he also cleaned it.","did"],["Rarely ___ she complain about the price.","does"],["Only after checking the fuse ___ I find the problem.","did"]]},
+{level:"B1→B2",title:"Advanced modals: should have / could have / would have",exp:"Should have — сожаление о том, что не сделал. Could have — была возможность. Would have — гипотетическое прошлое.",examples:[["I should have checked the warranty first.","Мне следовало сначала проверить гарантию."],["We could have finished earlier.","Мы могли бы закончить раньше."]],practice:[["You ___ (should / call) me earlier.","should have called"],["He ___ (could / fix) it, but he didn't have the part.","could have fixed"],["I ___ (would / help) if you had asked.","would have helped"],["She ___ (should not / say) that to the client.","shouldn't have said"]]},
+{level:"B1→B2",title:"Linking words: although, despite, however",exp:"Although/though + предложение. Despite/in spite of + существительное/-ing. However — начинает новое предложение.",examples:[["Although it was expensive, I bought the part.","Хотя это было дорого, я купил деталь."],["Despite the rain, we finished the job.","Несмотря на дождь, мы закончили работу."],["The job was hard. However, we finished on time.","Работа была сложной. Однако мы закончили вовремя."]],practice:[["___ it was late, he kept working.","Although"],["___ the cost, she decided to fix it.","Despite"],["He was tired. ___, he finished the report.","However"],["___ working all night, they finished early.","Despite"]]},
+{level:"B1→B2",title:"Cleft sentences (emphasis)",exp:"It was X who/that... и What I need is... — выносят важную часть предложения в начало для акцента.",examples:[["It was the motor that caused the problem.","Именно мотор стал причиной проблемы."],["What I need is a new compressor.","Что мне нужно, так это новый компрессор."]],practice:[["It was ___ (the fuse) that broke, not the motor.","the fuse"],["What ___ (I / need) is more time.","I need"],["It ___ (be) John who called, not Mary.","was"],["What surprised me ___ (be) the price.","was"]]},
+];
+
+const VOCAB = [
+{level:"A2",theme:"Приветствия и small talk",words:[["Nice to meet you","Приятно познакомиться","Nice to meet you, I'm the technician."],["How's it going?","Как дела?","Hey, how's it going today?"],["Take care","Береги себя","See you tomorrow, take care!"],["No worries","Не проблема","No worries, I'll be there in ten minutes."],["Have a good day","Хорошего дня","Thanks, have a good day!"],["See you later","Увидимся позже","I have to go now, see you later."],["What's up?","Что нового?","Hey, what's up? Long time no talk."],["Long time no see","Давно не виделись","Long time no see! How have you been?"],["Catch up","Наверстать, пообщаться","Let's catch up over coffee sometime."],["Small talk","Светская беседа","I'm not great at small talk in English yet."]]},
+{level:"A2",theme:"Семья",words:[["Sibling","Брат/сестра","I have two siblings."],["Spouse","Супруг(а)","My spouse works at the hospital."],["Relative","Родственник","She is a close relative of mine."],["Raise (children)","Растить (детей)","We are raising two kids."],["Household","Домашнее хозяйство","I manage the household finances."],["Extended family","Дальние родственники","Our extended family lives in Ukraine."],["Nephew / niece","Племянник / племянница","My nephew is visiting this weekend."],["In-laws","Родственники со стороны супруга","My in-laws live in Calgary."],["Only child","Единственный ребёнок","She is an only child."],["Guardian","Опекун","He is the legal guardian of his sister."]]},
+{level:"A2",theme:"Распорядок дня",words:[["Commute","Ездить на работу","My commute takes 40 minutes."],["Errand","Поручение, дело","I have a few errands to run."],["Routine","Распорядок","My morning routine is simple."],["Overslept","Проспал","I overslept and missed the call."],["Head out","Отправиться","I need to head out early."],["Wrap up","Заканчивать","Let's wrap up the shift."],["Alarm clock","Будильник","My alarm clock goes off at 6am."],["Get ready","Собираться","It takes me 20 minutes to get ready."],["Day off","Выходной день","Tomorrow is my day off."],["Squeeze in","Втиснуть, найти время","I can squeeze in one more job today."]]},
+{level:"A2",theme:"Еда и готовка",words:[["Leftovers","Остатки еды","I'll eat the leftovers for lunch."],["Ingredient","Ингредиент","This dish needs one more ingredient."],["Reheat","Разогреть","Just reheat it in the microwave."],["Grocery store","Продуктовый магазин","I'm stopping at the grocery store."],["Recipe","Рецепт","My mother's recipe is the best."],["Craving","Хотеться (о еде)","I have a craving for something sweet."],["Season (food)","Приправить","Season the meat with salt and pepper."],["Take-out","Еда на вынос","Let's order take-out tonight."],["Homemade","Домашнего приготовления","This soup is homemade."],["Portion","Порция","That's a big portion of food."]]},
+{level:"A2",theme:"Покупки",words:[["Receipt","Чек","Keep the receipt in case of a refund."],["Refund","Возврат денег","Can I get a refund for this?"],["Discount","Скидка","There's a 10% discount today."],["Warranty","Гарантия","This part has a two-year warranty."],["Out of stock","Нет в наличии","That model is out of stock."],["Checkout","Касса","There's a long line at the checkout."],["Bargain","Выгодная покупка","I found a real bargain online."],["Price tag","Ценник","The price tag says $45."],["Return policy","Политика возврата","What's your return policy?"],["On sale","На распродаже","These tools are on sale this week."]]},
+{level:"A2",theme:"Числа и деньги",words:[["Invoice","Счёт (документ)","I'll send you the invoice by email."],["Estimate","Смета, оценка","Can you give me a rough estimate?"],["Deposit","Задаток, депозит","I need a $50 deposit before starting."],["Cash / e-transfer","Наличные / перевод","You can pay by cash or e-transfer."],["Overdue","Просроченный","This invoice is two weeks overdue."],["Flat rate","Фиксированная цена","We charge a flat rate for the service call."],["Quote","Расценка, предложение цены","I sent her a quote yesterday."],["Balance due","Остаток к оплате","The balance due is $120."],["Surcharge","Дополнительная плата","There's a small surcharge for weekend calls."],["Round up / down","Округлить","Let's round it up to $100."]]},
+{level:"A2",theme:"Время и даты",words:[["Deadline","Крайний срок","The deadline for the report is Friday."],["Reschedule","Перенести (время)","Can we reschedule for next week?"],["In advance","Заранее","Please book in advance."],["Business hours","Рабочие часы","We're open during business hours."],["Overtime","Сверхурочные","I worked overtime yesterday."],["Punctual","Пунктуальный","He is always punctual."],["Ahead of schedule","Раньше графика","We finished ahead of schedule."],["Behind schedule","Отстаёт от графика","This job is behind schedule."],["Time off","Отгул","I'm taking some time off next month."],["Postpone","Отложить","We had to postpone the visit."]]},
+{level:"A2",theme:"Погода",words:[["Forecast","Прогноз","The forecast says it will snow tomorrow."],["Freezing","Морозный","It's freezing outside today."],["Slippery","Скользкий","Be careful, the road is slippery."],["Heatwave","Жара","We had a heatwave last week."],["Windy","Ветреный","It's very windy today."],["Clear skies","Ясное небо","We have clear skies this weekend."],["Overcast","Пасмурно","It's overcast this morning."],["Drizzle","Морось","There's a light drizzle outside."],["Frost","Мороз, иней","There was frost on the windshield."],["Humid","Влажно","It gets humid here in summer."]]},
+{level:"A2",theme:"Дом и мебель",words:[["Appliance","Бытовой прибор","The appliance stopped working."],["Outlet","Розетка","Plug it into the wall outlet."],["Leak","Протечка","There's a leak under the sink."],["Basement","Подвал","The washer is in the basement."],["Ventilation","Вентиляция","Check the ventilation system."],["Circuit breaker","Автомат (эл.)","The circuit breaker tripped again."],["Fuse box","Щиток предохранителей","The fuse box is in the hallway."],["Plumbing","Сантехника","We need a plumber for this."],["Insulation","Изоляция, утепление","The basement needs better insulation."],["Drafty","Продуваемый","This room is drafty in winter."]]},
+{level:"A2",theme:"Инструменты и оборудование",words:[["Screwdriver","Отвёртка","Pass me the screwdriver, please."],["Wrench","Гаечный ключ","I need a bigger wrench."],["Multimeter","Мультиметр","Use the multimeter to check the voltage."],["Wiring","Проводка","The wiring is old and damaged."],["Spare part","Запчасть","I ordered a spare part online."],["Toolbox","Ящик с инструментами","My toolbox is in the van."],["Pliers","Плоскогубцы","Hand me the pliers, please."],["Drill","Дрель","I used a drill to fix the panel."],["Soldering iron","Паяльник","I need a soldering iron for this wire."],["Gauge","Измерительный прибор","Check the pressure gauge first."]]},
+{level:"A2",theme:"Транспорт",words:[["Traffic jam","Пробка","I'm stuck in a traffic jam."],["Parking spot","Место для парковки","There's no parking spot nearby."],["Fuel up","Заправиться","I need to fuel up before the next job."],["Detour","Объезд","There's a detour on the highway."],["Flat tire","Спущенная шина","I got a flat tire this morning."],["Mileage","Пробег","My van has high mileage."],["Tow truck","Эвакуатор","We had to call a tow truck."],["Windshield","Лобовое стекло","There's a crack in my windshield."],["Registration","Регистрация автомобиля","My registration expires next month."],["Roadside assistance","Помощь на дороге","I called roadside assistance."]]},
+{level:"A2",theme:"Направления",words:[["Turn left/right","Повернуть налево/направо","Turn left at the next light."],["Straight ahead","Прямо","It's straight ahead, past the store."],["Intersection","Перекрёсток","The shop is near the intersection."],["Block","Квартал","It's two blocks from here."],["Landmark","Ориентир","Use the gas station as a landmark."],["Get lost","Заблудиться","I got lost on the way here."],["Roundabout","Круговое движение","Take the second exit at the roundabout."],["Crossroad","Перекрёсток дорог","Turn right at the crossroad."],["Shortcut","Короткий путь","I know a shortcut through the back street."],["GPS coordinates","Координаты GPS","I sent you the GPS coordinates."]]},
+{level:"A2",theme:"Здоровье и тело",words:[["Sore","Болящий (мышцы)","My back is sore from lifting."],["Injury","Травма","He had a minor injury at work."],["Exhausted","Измотанный","I'm exhausted after this shift."],["Painkiller","Обезболивающее","I took a painkiller for my headache."],["Checkup","Осмотр (у врача)","I have a checkup next week."],["Recover","Восстановиться","It took a week to recover."],["Symptom","Симптом","What symptoms do you have?"],["Prescription","Рецепт на лекарство","The doctor gave me a prescription."],["First aid","Первая помощь","We keep a first aid kit in the van."],["Allergic","Аллергичный","I'm allergic to dust."]]},
+{level:"A2",theme:"Безопасность и ЧС",words:[["Hazard","Опасность","Watch out, that's an electrical hazard."],["Emergency exit","Аварийный выход","The emergency exit is over there."],["Fire suppression","Пожаротушение","We service the fire suppression system."],["Evacuate","Эвакуироваться","Everyone must evacuate immediately."],["Protective gear","Защитное снаряжение","Always wear protective gear on site."],["Incident report","Отчёт о происшествии","I filled out an incident report."],["Fire extinguisher","Огнетушитель","There's a fire extinguisher by the door."],["Alarm system","Система сигнализации","The alarm system went off by mistake."],["First responder","Первый на месте происшествия","Firefighters are first responders."],["Risk assessment","Оценка риска","We did a risk assessment before starting."]]},
+{level:"A2",theme:"Работа и профессии",words:[["Sole proprietor","Индивидуальный предприниматель","I run my business as a sole proprietor."],["Shift","Смена","I work a 12-hour shift."],["Supervisor","Руководитель","My supervisor approved the schedule."],["Certification","Сертификация","I'm applying for a technician certification."],["Client","Клиент","I have three clients today."],["Contractor","Подрядчик","We hired a contractor for the job."],["Freelancer","Фрилансер","She works as a freelancer."],["Colleague","Коллега","My colleague helped me with the wiring."],["Job site","Объект, место работы","We're on a job site all day."],["Workload","Объём работы","My workload is heavy this week."]]},
+{level:"A2→B1",theme:"Телефонные звонки / диспетчер",words:[["Book an appointment","Записать на приём","I'd like to book an appointment for Tuesday."],["Hold the line","Оставаться на линии","Please hold the line for a moment."],["Callback","Обратный звонок","I'll give you a callback in an hour."],["Confirm the details","Подтвердить детали","Can you confirm the details of the job?"],["Available slot","Свободное время","We have an available slot tomorrow morning."],["Voicemail","Голосовая почта","Leave a message on my voicemail."],["Dispatcher","Диспетчер","The dispatcher scheduled the call."],["Missed call","Пропущенный звонок","I have a missed call from a client."],["Put on hold","Поставить на удержание","She put me on hold for two minutes."],["Wrong number","Не туда позвонил","Sorry, you have the wrong number."]]},
+{level:"A2→B1",theme:"Описание проблем",words:[["Malfunction","Неисправность","There's a malfunction in the control panel."],["Faulty part","Бракованная деталь","It's a faulty part, I need to replace it."],["Intermittent issue","Периодическая неисправность","It's an intermittent issue, hard to catch."],["Overheating","Перегрев","The motor is overheating."],["Diagnose","Диагностировать","Let me diagnose the problem first."],["Root cause","Первопричина","We found the root cause of the failure."],["Breakdown","Поломка","We had a complete breakdown last night."],["Wear and tear","Естественный износ","This is normal wear and tear."],["Short circuit","Короткое замыкание","There was a short circuit in the panel."],["Error code","Код ошибки","The display shows an error code."]]},
+{level:"A2→B1",theme:"Назначение встреч",words:[["Reschedule","Перенести","Can we reschedule to Thursday?"],["Confirm","Подтвердить","Please confirm the appointment by text."],["No-show","Неявка","We had a no-show yesterday."],["Time window","Временное окно","The technician will arrive within a 2-hour window."],["Priority job","Срочная работа","This is a priority job today."],["Follow-up visit","Повторный визит","We'll need a follow-up visit next week."],["Double-booked","Двойное бронирование","Sorry, I'm double-booked at that time."],["Cancel","Отменить","She had to cancel the appointment."],["On-site visit","Визит на месте","We scheduled an on-site visit."],["Pencil in","Предварительно запланировать","Let's pencil in Friday at 2pm."]]},
+{level:"A2→B1",theme:"Описание людей",words:[["Reliable","Надёжный","He is a reliable technician."],["Easy-going","Покладистый","She's easy-going and friendly."],["Stubborn","Упрямый","My client can be quite stubborn."],["Skilled","Опытный, квалифицированный","He's a skilled electrician."],["Patient","Терпеливый","You need to be patient with new clients."],["Detail-oriented","Внимательный к деталям","She's very detail-oriented at work."],["Hardworking","Трудолюбивый","He's one of the most hardworking guys I know."],["Organized","Организованный","She's very organized with paperwork."],["Blunt","Прямолинейный","He's a bit blunt, but honest."],["Approachable","Открытый, доступный для общения","My new supervisor is very approachable."]]},
+{level:"A2→B1",theme:"Эмоции",words:[["Frustrated","Раздражённый","I was frustrated with the delay."],["Relieved","Успокоенный, испытавший облегчение","I was relieved when the part arrived."],["Overwhelmed","Перегруженный (эмоционально)","I feel overwhelmed with all the jobs."],["Confident","Уверенный","I'm confident I can fix this."],["Anxious","Тревожный","She was anxious before the exam."],["Satisfied","Удовлетворённый","The client was satisfied with the repair."],["Annoyed","Раздражённый (легче)","He was a bit annoyed by the delay."],["Grateful","Благодарный","I'm grateful for the extra help."],["Nervous","Нервничающий","I was nervous before the certification test."],["Proud","Гордый","I'm proud of how the business has grown."]]},
+{level:"A2→B1",theme:"Хобби",words:[["DIY project","Проект своими руками","I'm working on a DIY project at home."],["Tinker with","Возиться, копаться в чём-то","I like to tinker with electronics."],["Hands-on","Практический","I prefer hands-on learning."],["Assemble","Собирать","I assembled the circuit myself."],["Prototype","Прототип","I built a small prototype."],["Spare time","Свободное время","I code a little in my spare time."],["Craft","Мастерить, ремесло","He crafts small wooden boxes."],["Blueprint","Чертёж","I drew a blueprint before building it."],["Experiment with","Экспериментировать с","I like to experiment with new tools."],["Passion project","Проект для души","This app is a passion project of mine."]]},
+{level:"A2→B1",theme:"Путешествия",words:[["Long-distance drive","Дальняя поездка на машине","I do a lot of long-distance driving for work."],["Border crossing","Пересечение границы","The border crossing took two hours."],["Accommodation","Проживание, жильё","We booked accommodation near the site."],["Itinerary","Маршрут","Here's the itinerary for the trip."],["Layover","Пересадка (в поездке)","We had a short layover."],["Round trip","Поездка туда и обратно","It's a 500km round trip."],["Road trip","Поездка на машине","We took a road trip across Alberta."],["Sightseeing","Осмотр достопримечательностей","We went sightseeing on the weekend."],["Jet lag","Усталость от смены часовых поясов","I had jet lag after the flight."],["Pack (luggage)","Собирать вещи","I need to pack my bag tonight."]]},
+{level:"A2→B1",theme:"Технологии и компьютеры",words:[["Update the software","Обновить программу","I need to update the software first."],["Backup","Резервная копия","Always keep a backup of your files."],["Glitch","Сбой, глюк","There's a glitch in the app."],["Troubleshoot","Устранять неполадки","Let's troubleshoot the connection issue."],["Sync","Синхронизировать","The calendar didn't sync properly."],["Interface","Интерфейс","The new interface is easier to use."],["App","Приложение","I built a small app for tracking jobs."],["Firmware","Прошивка","The device needs a firmware update."],["Cloud storage","Облачное хранилище","I keep my files in cloud storage."],["Reboot","Перезагрузить","Try to reboot the system first."]]},
+{level:"A2→B1",theme:"Окружающая среда",words:[["Recycle","Перерабатывать","We recycle old parts when possible."],["Energy-efficient","Энергоэффективный","This is an energy-efficient model."],["Pollution","Загрязнение","Oil sands work can cause pollution."],["Sustainable","Устойчивый (экологично)","We try to use sustainable materials."],["Emissions","Выбросы","New systems reduce emissions."],["Resource","Ресурс","Water is a valuable resource here."],["Carbon footprint","Углеродный след","We're trying to reduce our carbon footprint."],["Renewable energy","Возобновляемая энергия","Solar is a type of renewable energy."],["Waste","Отходы","We try to reduce waste at the shop."],["Conservation","Охрана природы","Conservation is important around Edmonton."]]},
+{level:"A2→B1",theme:"Образование",words:[["Enroll","Записаться (на курс)","I enrolled in an English course."],["Certificate","Сертификат","I received my certificate last month."],["Apprenticeship","Стажировка, ученичество","He completed his apprenticeship in plumbing."],["Assessment","Оценка, тест","The assessment takes two hours."],["Curriculum","Учебная программа","This curriculum covers A2 to B2."],["Self-taught","Самоучка","I'm mostly self-taught in electronics."],["Tuition","Плата за обучение","Tuition for the course wasn't too expensive."],["Mentor","Наставник","My mentor taught me a lot about the trade."],["Hands-on training","Практическое обучение","The apprenticeship gave me hands-on training."],["Exam","Экзамен","I passed the certification exam."]]},
+{level:"A2→B1",theme:"Деньги и банк",words:[["Transfer","Перевод (денег)","I'll transfer the money today."],["Account balance","Баланс счёта","Check your account balance first."],["Loan","Кредит, займ","We took out a small business loan."],["Interest rate","Процентная ставка","The interest rate went up this year."],["Budget","Бюджет","I'm working on a budget app."],["Expense","Расход","Track every business expense."],["Savings","Сбережения","I put some money into savings every month."],["Credit score","Кредитный рейтинг","A good credit score helps with loans."],["Overdraft","Овердрафт","I try to avoid going into overdraft."],["Investment","Инвестиция","Buying new tools was a good investment."]]},
+{level:"B1",theme:"Право и правила",words:[["Regulation","Норма, регламент","This regulation applies to all technicians."],["Comply with","Соблюдать (правила)","We must comply with safety codes."],["License","Лицензия","You need a license to operate this."],["Liability","Ответственность (юр.)","The company has liability insurance."],["Violation","Нарушение","That's a safety violation."],["Permit","Разрешение","We need a permit for this installation."],["Code of conduct","Кодекс поведения","Every technician follows the code of conduct."],["Enforce","Обеспечивать соблюдение","Inspectors enforce these rules strictly."],["Inspection","Инспекция, проверка","We passed the annual inspection."],["Fine (penalty)","Штраф","You can get a fine for a safety violation."]]},
+{level:"B1",theme:"СМИ и новости",words:[["Headline","Заголовок","The headline caught my attention."],["Source","Источник","Where is this information from? What's the source?"],["Broadcast","Трансляция","The news broadcast starts at 6."],["Coverage","Освещение (в СМИ)","There was local coverage of the event."],["Reliable source","Надёжный источник","Always check if it's a reliable source."],["Breaking news","Срочные новости","There's breaking news about the weather."],["Journalist","Журналист","A journalist interviewed local business owners."],["Article","Статья","I read an article about small businesses."],["Bias","Предвзятость","Every source has some bias."],["Op-ed","Редакционная колонка мнений","She wrote an op-ed about local trades."]]},
+{level:"B1",theme:"Спорт",words:[["Compete","Соревноваться","They compete every weekend."],["Referee","Судья","The referee made a bad call."],["Score a point","Забить очко","He scored a point in the last minute."],["Training session","Тренировка","We have a training session tonight."],["Opponent","Соперник","Our opponent was very strong."],["Championship","Чемпионат","They won the regional championship."],["Teammate","Товарищ по команде","My teammate passed me the ball."],["Coach","Тренер","The coach called a timeout."],["Warm-up","Разминка","We did a ten-minute warm-up."],["Injury time-out","Перерыв из-за травмы","There was an injury time-out in the second half."]]},
+{level:"B1",theme:"Природа и животные",words:[["Wildlife","Дикая природа","There's a lot of wildlife near Edmonton."],["Habitat","Среда обитания","This is a protected habitat."],["Species","Вид (животных)","Many species live in this forest."],["Migration","Миграция","Bird migration happens in the fall."],["Ecosystem","Экосистема","The ecosystem here is fragile."],["Predator","Хищник","Wolves are the main predator here."],["Endangered","Исчезающий вид","This is an endangered species."],["Prey","Добыча","The fox was hunting for prey."],["Conservation area","Заповедная зона","It's a protected conservation area."],["Breed","Порода, размножаться","Some animals breed only once a year."]]},
+{level:"B1",theme:"Деловая переписка",words:[["Follow up","Напомнить о себе, уточнить","I'm writing to follow up on my last email."],["Attach","Прикрепить","I've attached the invoice."],["As per our conversation","Как обсуждалось","As per our conversation, here's the quote."],["Kindly","Любезно (формально)","Kindly confirm the appointment time."],["Looking forward to","С нетерпением жду","Looking forward to hearing from you."],["Regards","С уважением","Best regards, Pavlo."],["CC (carbon copy)","Копия письма","I'll CC my supervisor on this email."],["Draft (email)","Черновик","I saved the email as a draft."],["Subject line","Тема письма","Keep the subject line short and clear."],["Reply-all","Ответить всем","Please don't reply-all to this thread."]]},
+{level:"B1",theme:"Переговоры и жалобы",words:[["Negotiate","Договариваться","We negotiated a better price."],["Compromise","Компромисс","Let's find a compromise."],["File a complaint","Подать жалобу","The client wants to file a complaint."],["Resolve the issue","Решить проблему","We resolved the issue same day."],["Compensation","Компенсация","We offered a small compensation."],["Unacceptable","Неприемлемый","This delay is unacceptable."],["Escalate","Передать выше, обострить","She wanted to escalate the complaint."],["Deal-breaker","Решающий фактор против","The price was a deal-breaker for the client."],["Meet halfway","Пойти на встречу, компромисс","Let's try to meet halfway on the price."],["Terms and conditions","Условия договора","Please read the terms and conditions."]]},
+{level:"B1→B2",theme:"Инструкции",words:[["Step-by-step","Пошагово","Follow these instructions step-by-step."],["Prior to","До, перед (формально)","Turn off the power prior to opening the panel."],["Ensure that","Убедиться, что","Ensure that the area is dry."],["In case of","В случае","In case of a leak, shut the valve."],["Proceed to","Перейти к","Proceed to the next step."],["Refer to the manual","Смотрите инструкцию","Refer to the manual for exact specs."],["Beforehand","Заранее","Read the safety notes beforehand."],["Precaution","Мера предосторожности","Take precautions before starting the repair."],["Double-check","Перепроверить","Always double-check the wiring."],["Troubleshooting guide","Руководство по устранению неполадок","Check the troubleshooting guide first."]]},
+{level:"B1→B2",theme:"Мнения и согласие",words:[["I'd argue that...","Я бы сказал, что...","I'd argue that quality matters more than speed."],["To some extent","В какой-то степени","I agree with that, to some extent."],["I see your point, but...","Понимаю тебя, но...","I see your point, but the cost is too high."],["It depends on...","Зависит от...","It depends on the model and age of the unit."],["From my experience...","По моему опыту...","From my experience, this brand breaks often."],["I couldn't agree more","Полностью согласен","I couldn't agree more with that."],["On the other hand","С другой стороны","On the other hand, the part is cheaper elsewhere."],["That being said...","Тем не менее...","That being said, quality is still important."],["In my opinion...","По моему мнению...","In my opinion, this brand is more reliable."],["I'm not so sure about that","Я не совсем уверен в этом","I'm not so sure about that, honestly."]]},
+{level:"B1→B2",theme:"Идиомы для работы",words:[["Learn the ropes","Освоиться, научиться делу","It took a month to learn the ropes."],["Under the weather","Неважно себя чувствовать","I'm a bit under the weather today."],["Hit the ground running","Начать активно, без раскачки","The new hire hit the ground running."],["Cut corners","Экономить в ущерб качеству","We never cut corners on safety."],["Get the ball rolling","Начать процесс","Let's get the ball rolling on this project."],["Back to square one","Начать заново","The part didn't fit, back to square one."],["Piece of cake","Проще простого","That repair was a piece of cake."],["On the same page","Понимать друг друга одинаково","Let's make sure we're on the same page."],["Burn the midnight oil","Работать допоздна","I had to burn the midnight oil to finish the report."],["Call it a day","Закончить на сегодня","It's late, let's call it a day."]]},
+{level:"B1→B2",theme:"Формальный vs неформальный язык",words:[["Could you possibly...","Не могли бы вы...","Could you possibly send the file today?"],["No problem / No worries","Без проблем (неформ.)","No worries, I'll handle it."],["I would appreciate it if...","Буду признателен, если...","I would appreciate it if you could confirm."],["Gonna / wanna","Собираюсь / хочу (разг.)","I'm gonna call him now."],["Please be advised that...","Уведомляем вас, что...","Please be advised that the rate has changed."],["Hey, quick question","Эй, короткий вопрос (неформ.)","Hey, quick question about the invoice."],["I'm afraid that...","Боюсь, что... (формально)","I'm afraid that part is out of stock."],["Sure thing!","Конечно! (неформально)","Sure thing, I'll be there at 9."],["At your earliest convenience","При первой возможности (формально)","Please reply at your earliest convenience."],["My bad","Моя вина (неформально)","My bad, I got the address wrong."]]},
+];
+
+const LISTENING = [
+{level:"A2",text:"My name is a technician. I fix washing machines and fridges. Every morning, I check my van and load my tools. I usually visit three or four clients a day. I like my job because every day is different.",qs:[["The speaker fixes cars.",false],["He checks his van in the morning.",true],["He visits three or four clients a day.",true]]},
+{level:"A2",text:"Yesterday I fixed a dryer for a client in west Edmonton. The machine was making a strange noise. I opened it and found a broken belt. I replaced the belt and the dryer worked perfectly. The client was very happy.",qs:[["He fixed a dryer.",true],["The problem was a broken door.",false],["The client was unhappy.",false]]},
+{level:"A2",theme:"", text:"Tomorrow I am going to visit a new client. She has a broken dishwasher. I will bring my toolbox and a multimeter. If the part is broken, I will order a new one online.",qs:[["He is visiting an old client.",false],["He will bring a toolbox.",true],["He will order a part if needed.",true]]},
+{level:"A2",text:"I have two vehicles. One is for work, and one is for the family. I drive a lot every week because my clients live far apart. Sometimes I drive more than 100 kilometers in one day.",qs:[["He has three vehicles.",false],["He drives a lot for work.",true],["His clients live close together.",false]]},
+{level:"A2",text:"Every technician must wear safety gloves and glasses. Safety is very important in this job. Before I start any repair, I turn off the power. This protects me from electric shocks.",qs:[["Safety gloves are optional.",false],["He turns off the power before repairs.",true],["Safety is not important.",false]]},
+{level:"A2",text:"My English is improving slowly. I practice every day for thirty minutes. I study grammar, listen to short texts, and write simple sentences. I want to reach a good level by the end of the year.",qs:[["He practices every day.",true],["He never studies grammar.",false],["His goal is to improve his English.",true]]},
+{level:"A2",text:"I received a call from a new client this morning. Her fridge stopped working overnight. I asked her a few questions about the problem. Then I scheduled a visit for tomorrow afternoon.",qs:[["The client called about a dryer.",false],["He scheduled a visit for tomorrow.",true],["He didn't ask any questions.",false]]},
+{level:"A2",text:"On weekends, I sometimes work on small electronics projects at home. I enjoy building simple circuits and fixing old devices. It helps me relax after a busy week of repairs.",qs:[["He never works on projects at home.",false],["He enjoys electronics as a hobby.",true],["This activity helps him relax.",true]]},
+{level:"A2",text:"I keep all my client information in a simple spreadsheet. It has names, phone numbers, and appointment dates. This helps me stay organized and remember important details about each job.",qs:[["He uses a spreadsheet for clients.",true],["He doesn't record phone numbers.",false],["The spreadsheet helps him stay organized.",true]]},
+{level:"A2→B1",text:"Last month, I was working on a big project when my supplier ran out of a key part. I had to call three different shops before I found one that had it in stock. It was frustrating, but the client understood the delay.",qs:[["He found the part immediately.",false],["He called several shops.",true],["The client was angry about the delay.",false]]},
+{level:"A2→B1",text:"When I started my business two years ago, I didn't have many clients. Now I have a full schedule every week. I've learned a lot about marketing, pricing, and customer service since then.",qs:[["He started his business two years ago.",true],["He has fewer clients now than before.",false],["He learned about marketing.",true]]},
+{level:"A2→B1",text:"If I get more technicians on my team, I will be able to take more jobs across Alberta. Right now, I work alone, so I can only handle a limited number of calls each day.",qs:[["He already has a large team.",false],["He works alone right now.",true],["More technicians would let him take more jobs.",true]]},
+{level:"A2→B1",text:"I once fixed a commercial oven at a restaurant that hadn't worked for three weeks. The owner had called two other companies, but they couldn't find the problem. It took me an hour to find a loose wire.",qs:[["The oven had worked fine for weeks.",false],["Other companies had already tried to fix it.",true],["The problem was a loose wire.",true]]},
+{level:"A2→B1",text:"My supervisor at the plant is very strict about safety procedures. Every worker must follow the checklist before starting any task involving the fire suppression system. This reduces the risk of accidents significantly.",qs:[["The supervisor is relaxed about safety.",false],["Workers must follow a checklist.",true],["This is about the fire suppression system.",true]]},
+{level:"A2→B1",text:"I've been thinking about hiring my first employee. It's a big decision because I would need to manage payroll, training, and scheduling for someone else, not just myself.",qs:[["He has decided against hiring anyone.",false],["Hiring someone involves payroll and training.",true],["He is only thinking about himself right now, with no plans to expand.",false]]},
+{level:"A2→B1",text:"A client called me angry because the repair I did last month broke again. I apologized, explained that this can happen sometimes, and offered to fix it for free since it was still under warranty.",qs:[["The client was happy.",false],["He offered a free fix under warranty.",true],["He refused to help the client.",false]]},
+{level:"A2→B1",text:"When I moved to Edmonton, everything felt new and difficult, especially the language. Over time, I built relationships with clients, learned the local rules, and slowly felt more confident.",qs:[["He found everything easy at first.",false],["He built relationships with clients over time.",true],["The move happened in Edmonton, not away from it.",false]]},
+{level:"A2→B1",text:"I usually price a job based on the time it will take and the cost of parts. Sometimes clients ask for a flat rate, so I try to estimate carefully to avoid losing money.",qs:[["He never thinks about pricing.",false],["He sometimes gives a flat rate.",true],["He tries to estimate carefully.",true]]},
+{level:"B1",text:"Running a small business has taught me that technical skills are only half of the job. The other half is communication — explaining problems clearly, managing expectations, and following up with clients after the work is done.",qs:[["Technical skills are the only important thing.",false],["Communication matters for running a business.",true],["Following up with clients is mentioned.",true]]},
+{level:"B1",text:"I had been driving for almost two hours when I realized I had left an important tool at the last job site. I had to turn around, which delayed my next appointment by forty minutes.",qs:[["He forgot a tool at the last site.",true],["He arrived early to his next appointment.",false],["He had been driving for almost two hours.",true]]},
+{level:"B1",text:"If I had known how competitive the appliance repair market was, I might have chosen a different specialty. That said, I've built a solid reputation over the years, which has made it easier to find steady work.",qs:[["He regrets nothing about his career choice, without ever wondering about it.",false],["He has built a solid reputation.",true],["Finding steady work has become easier for him.",true]]},
+{level:"B1",text:"Despite the long hours and unpredictable schedule, I enjoy the independence of being self-employed. I can decide which jobs to take and how to organize my week, which wouldn't be possible working for someone else.",qs:[["He dislikes being self-employed.",false],["He values the independence of his schedule.",true],["He has no control over which jobs he takes.",false]]},
+{level:"B1",text:"The technician who trained me used to say that a good diagnosis takes patience, not just knowledge. He would rather spend twenty extra minutes checking everything than guess and replace the wrong part.",qs:[["The trainer valued patience in diagnosis.",true],["He preferred to guess quickly.",false],["He would rather check everything carefully.",true]]},
+{level:"B1",text:"I've noticed that clients trust technicians more when they explain the problem in simple terms, rather than using technical jargon. Since I started doing this, I've received more positive reviews and referrals.",qs:[["Using jargon builds more trust.",false],["Simple explanations increased his positive reviews.",true],["He noticed a change in client behavior.",true]]},
+{level:"B1",text:"Not only did the client's fridge stop working, but the freezer had also started leaking. It turned out that both problems were connected to the same faulty compressor, which needed to be replaced entirely.",qs:[["Only the fridge had a problem.",false],["Both problems were connected to the compressor.",true],["The compressor needed to be replaced.",true]]},
+{level:"B1",text:"I wish I had learned English more seriously years ago. It would have made expanding my business, hiring a team, and communicating with English-speaking clients much easier from the very beginning.",qs:[["He is fully satisfied with his English progress and has no regrets.",false],["Better English would have helped his business.",true],["He mentions hiring a team.",true]]},
+{level:"B1",text:"Last week a client complained that a repair cost more than the estimate. I explained that an extra part was needed once I opened the unit, and I offered a small discount as a compromise. In the end, she was satisfied with the outcome.",qs:[["The final price matched the original estimate exactly.",false],["He offered a discount as a compromise.",true],["The client was satisfied in the end.",true]]},
+{level:"B1→B2",text:"Had I checked the wiring diagram before starting, I would have saved myself an hour of guessing. It's a lesson I now apply to every complex job: always review the documentation first, no matter how confident you feel.",qs:[["He checked the diagram first and saved time.",false],["He now reviews documentation before complex jobs.",true],["Confidence alone was enough for him.",false]]},
+{level:"B1→B2",text:"What surprised me most about running a business wasn't the technical challenges, but the amount of paperwork involved — invoices, permits, tax records, and client communication all take significant time each week.",qs:[["Technical challenges surprised him the most.",false],["Paperwork takes significant time.",true],["Invoices are mentioned as part of the paperwork.",true]]},
+{level:"B1→B2",text:"Although the appliance repair industry can be unpredictable, with slow weeks followed by extremely busy ones, I've found that building long-term relationships with clients helps smooth out the fluctuations in demand.",qs:[["The industry is always perfectly predictable.",false],["Long-term relationships help smooth demand fluctuations.",true],["He mentions slow and busy weeks.",true]]},
+{level:"B1→B2",text:"It was the lack of proper documentation, not a lack of skill, that caused most of the delays on that project. Once we started keeping detailed records of every repair, our turnaround time improved significantly.",qs:[["A lack of skill caused the delays.",false],["Detailed records improved turnaround time.",true],["Documentation was the real cause of delays.",true]]},
+{level:"B1→B2",text:"If I hadn't invested in a good diagnostic tool early on, I would probably still be spending hours guessing at problems instead of identifying them within minutes. It was one of the best decisions I made for my business.",qs:[["He regrets buying the diagnostic tool.",false],["The tool helps him identify problems faster.",true],["He still spends hours guessing.",false]]},
+{level:"B1→B2",text:"Rarely do I take on a job without giving the client a clear estimate first, even if it means the conversation takes a few extra minutes. Clear communication upfront prevents most disputes about pricing later on.",qs:[["He rarely gives estimates before starting.",false],["Clear communication prevents pricing disputes.",true],["He values upfront conversations with clients.",true]]},
+{level:"B1→B2",text:"The client whose oven I fixed last year recommended me to three other restaurant owners, which shows how valuable word-of-mouth marketing can be in a small, close-knit business community like this one.",qs:[["The client recommended him to others.",true],["Word-of-mouth had no effect on his business.",false],["The community is described as close-knit.",true]]},
+{level:"B1→B2",text:"I've been meaning to formalize my safety checklist for a while, but between managing jobs and paperwork, it's one of those tasks that keeps getting pushed to next week — until, eventually, I finally sat down and wrote it properly.",qs:[["He formalized his checklist immediately.",false],["The task kept getting delayed.",true],["He eventually finished writing it.",true]]},
+{level:"B1→B2",text:"What I need most right now isn't more clients, but more time — time to train a second technician, streamline my scheduling, and step back from doing every single repair myself.",qs:[["He needs more clients most of all.",false],["He wants to train a second technician.",true],["He wants to step back from doing every repair himself.",true]]},
+];
+
+const WRITING = [
+{level:"A2",prompt:"Опиши свой обычный рабочий день. Что ты делаешь утром, днём и вечером? (Present Simple)",min:40},
+{level:"A2",prompt:"Расскажи, что ты делал вчера на работе. Используй Past Simple.",min:40},
+{level:"A2",prompt:"Опиши свой инструментарий (toolbox). Что там есть? Используй some/any и countable/uncountable.",min:35},
+{level:"A2",prompt:"Сравни два прибора, которые ты чинил (например, старый и новый холодильник). Используй comparatives.",min:40},
+{level:"A2",prompt:"Напиши, что ты планируешь сделать на следующей неделе (going to / will).",min:35},
+{level:"A2",prompt:"Опиши, где находятся вещи в твоём фургоне/мастерской (prepositions of place).",min:35},
+{level:"A2",prompt:"Напиши три правила безопасности для технического работника (must/should/can).",min:35},
+{level:"A2",prompt:"Расскажи о своём опыте: что ты уже когда-либо чинил? (Present Perfect: ever/never)",min:35},
+{level:"A2",prompt:"Опиши свой рабочий фургон или инструмент, используя a/an/the правильно.",min:30},
+{level:"A2→B1",prompt:"Опиши ситуацию, когда что-то прервало твою работу (Past Continuous). Что ты делал, когда это случилось?",min:45},
+{level:"A2→B1",prompt:"Сравни свой опыт вчера и за всю карьеру (Present Perfect vs Past Simple).",min:45},
+{level:"A2→B1",prompt:"Напиши, что ты сделаешь, если клиент не заплатит вовремя (First Conditional).",min:40},
+{level:"A2→B1",prompt:"Напиши, что бы ты сделал, если бы у тебя было больше техников (Second Conditional).",min:40},
+{level:"A2→B1",prompt:"Перескажи разговор с клиентом в косвенной речи (Reported speech).",min:45},
+{level:"A2→B1",prompt:"Опиши, как обычно проверяют/заказывают детали в твоём бизнесе (Passive Voice, Present Simple).",min:40},
+{level:"A2→B1",prompt:"Опиши идеального клиента и идеального технического специалиста, используя relative clauses (who/which/that).",min:45},
+{level:"A2→B1",prompt:"Напиши, что ты раньше делал по-другому в работе (used to).",min:35},
+{level:"A2→B1",prompt:"Опиши типичную проблему с техникой, используя как минимум 3 phrasal verbs из урока.",min:45},
+{level:"B1",prompt:"Опиши, чем ты занимаешься уже долгое время (Present Perfect Continuous) — например, работой или изучением английского.",min:50},
+{level:"B1",prompt:"Расскажи историю: что уже произошло до того, как случилось что-то другое (Past Perfect).",min:50},
+{level:"B1",prompt:"Напиши о ситуации, о которой сожалеешь, используя Third Conditional.",min:50},
+{level:"B1",prompt:"Опиши, как обычно обрабатывались заказы в прошлом на твоей работе (Passive Voice, Past Simple).",min:45},
+{level:"B1",prompt:"Напиши о своих привычках на работе, используя gerunds и infinitives (enjoy doing / want to do).",min:45},
+{level:"B1",prompt:"Сделай 3 предположения о причине поломки техники, используя must/might/can't.",min:40},
+{level:"B1",prompt:"Напиши короткий диалог с вопросительными хвостиками (question tags).",min:35},
+{level:"B1",prompt:"Напиши вежливое сообщение клиенту с непрямыми вопросами (indirect questions).",min:40},
+{level:"B1",prompt:"Перескажи вопросы и команды клиента в косвенной речи.",min:45},
+{level:"B1→B2",prompt:"Опиши гипотетическую ситуацию с элементами прошлого и настоящего (Mixed Conditionals).",min:55},
+{level:"B1→B2",prompt:"Напиши короткий формальный текст о процессах в твоей компании, используя пассив во всех временах.",min:55},
+{level:"B1→B2",prompt:"Опиши своих клиентов или коллег, используя whose/where и non-defining relative clauses.",min:50},
+{level:"B1→B2",prompt:"Напиши, о чём ты сожалеешь или чего тебе не хватает (wish / if only).",min:45},
+{level:"B1→B2",prompt:"Опиши, что ты недавно 'заказал сделать' кому-то (causative: have something done).",min:45},
+{level:"B1→B2",prompt:"Напиши короткий эмоциональный рассказ с инверсией для акцента (Never have I..., Rarely does...).",min:45},
+{level:"B1→B2",prompt:"Опиши прошлую ошибку и что нужно было сделать иначе (should have / could have / would have).",min:50},
+{level:"B1→B2",prompt:"Напиши короткий деловой абзац, используя although, despite, however.",min:50},
+{level:"B1→B2",prompt:"Опиши, что для тебя сейчас самое важное в бизнесе, используя cleft sentence (What I need is...).",min:45},
+];
+
+const TOTAL = GRAMMAR.length; // 36
+
+/* ================= STATE ================= */
+const KEY = "eng_shift_progress_v1";
+function loadState(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {day:1, streak:0, lastCompleteDate:null, tasks:{}, drafts:{}};
+}
+function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+let state = loadState();
+
+function levelInfo(day){
+  const cyclePos = ((day-1) % TOTAL); // 0-indexed content index
+  const cycleNum = Math.floor((day-1) / TOTAL); // 0 = first pass, 1+ = review
+  const g = GRAMMAR[cyclePos];
+  const pct = Math.min(100, Math.round((cyclePos+1)/TOTAL*100));
+  return {idx: cyclePos, level: g.level, isReview: cycleNum > 0, cycleNum, pct};
+}
+const LEVEL_LABELS = {
+  "A2":"Базовый уровень","A2→B1":"Переход к среднему","B1":"Средний уровень","B1→B2":"Переход к продвинутому"
+};
+const LEVEL_PCT = {"A2":15,"A2→B1":38,"B1":62,"B1→B2":85};
+
+/* ================= RENDER ================= */
+function taskKey(day){ return String(day); }
+function getTasks(day){
+  const k = taskKey(day);
+  if(!state.tasks[k]) state.tasks[k] = [false,false,false,false];
+  return state.tasks[k];
+}
+function setTask(day, i, val){
+  const t = getTasks(day);
+  t[i] = val;
+  saveState();
+  render();
+}
+
+function render(){
+  const day = state.day;
+  const info = levelInfo(day);
+  const g = GRAMMAR[info.idx];
+  const v = VOCAB[info.idx];
+  const l = LISTENING[info.idx];
+  const w = WRITING[info.idx];
+  const tasks = getTasks(day);
+
+  document.getElementById('streakNum').textContent = state.streak;
+  document.getElementById('lvlNow').textContent = info.level;
+  document.getElementById('lvlLabel').textContent = LEVEL_LABELS[info.level] + (info.isReview ? " · Повторение (круг "+(info.cycleNum+1)+")" : "");
+  document.getElementById('dayCount').textContent = "День "+day+" · Тема "+(info.idx+1)+"/"+TOTAL;
+  document.getElementById('lvlBarFill').style.width = LEVEL_PCT[info.level] + "%";
+  const arcLen = 141;
+  document.getElementById('gaugeArc').setAttribute('stroke-dashoffset', arcLen - (arcLen*LEVEL_PCT[info.level]/100));
+  document.getElementById('gaugeLabel').textContent = info.level.replace("→","-");
+
+  const reviewBadge = info.isReview ? '<span class="review-flag">Повтор</span>' : '';
+
+  const html = `
+    <div class="ticket" data-idx="0">
+      <div class="head" onclick="toggleTicket(0)">
+        <div class="h-left"><span class="tag">Грамматика</span><h3>${g.title}${reviewBadge}</h3></div>
+        <div style="display:flex;align-items:center;">
+          <div class="check ${tasks[0]?'done':''}" onclick="event.stopPropagation();setTask(${day},0,${!tasks[0]})">${tasks[0]?'✓':''}</div>
+          <span class="chevron" id="chev0">▾</span>
+        </div>
+      </div>
+      <div class="body" id="body0">
+        <p class="small">${g.exp}</p>
+        ${g.examples.map(e=>`<div class="ex">${e[0]}<span class="ru">${e[1]}</span></div>`).join('')}
+        <p class="small muted" style="margin-top:10px;">Практика — заполни пропуски:</p>
+        ${g.practice.map((p,i)=>`
+          <div class="practice-item">
+            <div class="q">${i+1}. ${p[0]}</div>
+            <input type="text" placeholder="твой ответ" oninput="checkPractice(this,'${p[1].replace(/'/g,"\\'")}')" onblur="checkPracticeBlur(this,'${p[1].replace(/'/g,"\\'")}')">
+            <div class="ans" id="ans-g-${i}">Ответ: ${p[1]}</div>
+          </div>`).join('')}
+        <div class="row-btns">
+          <button class="btn ghost" onclick="revealAll('g')">Показать все ответы</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticket" data-idx="1">
+      <div class="head" onclick="toggleTicket(1)">
+        <div class="h-left"><span class="tag">Лексика</span><h3>${v.theme}${reviewBadge}</h3></div>
+        <div style="display:flex;align-items:center;">
+          <div class="check ${tasks[1]?'done':''}" onclick="event.stopPropagation();setTask(${day},1,${!tasks[1]})">${tasks[1]?'✓':''}</div>
+          <span class="chevron" id="chev1">▾</span>
+        </div>
+      </div>
+      <div class="body" id="body1">
+        <div class="vocab-grid">
+          ${v.words.map(wd=>`
+            <div class="vocab-card">
+              <span class="en">${wd[0]}</span><span class="ru">${wd[1]}</span>
+              <div class="ex">${wd[2]}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="ticket" data-idx="2">
+      <div class="head" onclick="toggleTicket(2)">
+        <div class="h-left"><span class="tag">Аудирование</span><h3>Слушай и ответь${reviewBadge}</h3></div>
+        <div style="display:flex;align-items:center;">
+          <div class="check ${tasks[2]?'done':''}" onclick="event.stopPropagation();setTask(${day},2,${!tasks[2]})">${tasks[2]?'✓':''}</div>
+          <span class="chevron" id="chev2">▾</span>
+        </div>
+      </div>
+      <div class="body" id="body2">
+        <div class="listen-box">
+          <p class="small" id="listenText">${l.text}</p>
+          <button class="btn amber" onclick="speakText()">🔊 Слушать</button>
+        </div>
+        <p class="small muted" style="margin-top:12px;">Правда или ложь?</p>
+        ${l.qs.map((q,i)=>`
+          <div class="tf">
+            <span>${q[0]}</span>
+            <span class="tf-btns" id="tf-${i}">
+              <button onclick="answerTF(${i},true,${q[1]})">True</button>
+              <button onclick="answerTF(${i},false,${q[1]})">False</button>
+            </span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="ticket" data-idx="3">
+      <div class="head" onclick="toggleTicket(3)">
+        <div class="h-left"><span class="tag">Письмо</span><h3>Практика письма${reviewBadge}</h3></div>
+        <div style="display:flex;align-items:center;">
+          <div class="check ${tasks[3]?'done':''}" onclick="event.stopPropagation();setTask(${day},3,${!tasks[3]})">${tasks[3]?'✓':''}</div>
+          <span class="chevron" id="chev3">▾</span>
+        </div>
+      </div>
+      <div class="body" id="body3">
+        <p class="small">${w.prompt}</p>
+        <p class="small muted">Цель: минимум ${w.min} слов.</p>
+        <textarea id="writingArea" placeholder="Пиши здесь по-английски..." oninput="onWriteInput()">${state.drafts[taskKey(day)]||''}</textarea>
+        <div class="wc" id="wc">0 / ${w.min} слов</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('tickets').innerHTML = html;
+
+  // re-open previously open ticket if any (default: first not-done open)
+  const firstOpen = tasks.findIndex(t=>!t);
+  toggleTicket(firstOpen === -1 ? 0 : firstOpen, true);
+
+  updateWC();
+  updateCompleteBtn();
+}
+
+let openTicket = 0;
+function toggleTicket(i, forceOpen){
+  const body = document.getElementById('body'+i);
+  const chev = document.getElementById('chev'+i);
+  if(!body) return;
+  // close others
+  [0,1,2,3].forEach(j=>{
+    const b = document.getElementById('body'+j);
+    const c = document.getElementById('chev'+j);
+    if(!b) return;
+    if(j===i){
+      if(forceOpen){ b.classList.add('open'); c.classList.add('open'); }
+      else { b.classList.toggle('open'); c.classList.toggle('open'); }
+    } else if(!forceOpen){
+      b.classList.remove('open'); c.classList.remove('open');
+    }
+  });
+}
+
+function isCloseMatch(val, correct){
+  const v = val.trim().toLowerCase();
+  const c = correct.trim().toLowerCase();
+  return v.length > 1 && (c.includes(v) || v.includes(c.split(' ')[0]));
+}
+function checkPractice(el, correct){
+  // while typing: only show green as soon as it looks right, otherwise neutral (no red yet)
+  if(isCloseMatch(el.value, correct)){
+    el.style.borderColor = 'var(--teal)';
+    el.style.background = '';
+  } else {
+    el.style.borderColor = 'var(--line)';
+    el.style.background = '';
+  }
+}
+function checkPracticeBlur(el, correct){
+  const val = el.value.trim();
+  if(val.length === 0){
+    el.style.borderColor = 'var(--line)';
+    el.style.background = '';
+    return;
+  }
+  if(isCloseMatch(val, correct)){
+    el.style.borderColor = 'var(--teal)';
+    el.style.background = '';
+  } else {
+    el.style.borderColor = 'var(--red)';
+    el.style.background = 'rgba(217,105,95,0.08)';
+  }
+}
+function revealAll(prefix){
+  document.querySelectorAll(`[id^="ans-${prefix}-"]`).forEach(el=>el.classList.add('show'));
+}
+
+let currentUtterance = null;
+function speakText(){
+  if(!('speechSynthesis' in window)){ alert('Озвучка не поддерживается в этом браузере.'); return; }
+  window.speechSynthesis.cancel();
+  const day = state.day;
+  const info = levelInfo(day);
+  const text = LISTENING[info.idx].text;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.92;
+  window.speechSynthesis.speak(u);
+}
+
+function answerTF(i, chosen, correct){
+  const box = document.getElementById('tf-'+i);
+  box.querySelectorAll('button').forEach(b=>b.classList.remove('sel'));
+  const btn = chosen ? box.children[0] : box.children[1];
+  btn.classList.add('sel');
+  btn.style.background = (chosen===correct) ? 'var(--teal)' : 'var(--red)';
+  btn.style.color = '#fff';
+  btn.style.borderColor = 'transparent';
+}
+
+function onWriteInput(){
+  const day = state.day;
+  const text = document.getElementById('writingArea').value;
+  state.drafts[taskKey(day)] = text;
+  saveState();
+  updateWC();
+}
+function updateWC(){
+  const el = document.getElementById('writingArea');
+  if(!el) return;
+  const day = state.day;
+  const info = levelInfo(day);
+  const min = WRITING[info.idx].min;
+  const words = el.value.trim().split(/\s+/).filter(Boolean).length;
+  const wc = document.getElementById('wc');
+  wc.textContent = words + " / " + min + " слов";
+  wc.className = "wc" + (words >= min ? " ok" : "");
+}
+
+function updateCompleteBtn(){
+  const tasks = getTasks(state.day);
+  const btn = document.getElementById('completeBtn');
+  const allDone = tasks.every(Boolean);
+  btn.classList.toggle('ready', allDone);
+  btn.textContent = allDone ? "Завершить день "+state.day+" →" : "Заверши все 4 блока →";
+}
+
+document.getElementById('completeBtn').addEventListener('click', ()=>{
+  const tasks = getTasks(state.day);
+  if(!tasks.every(Boolean)) return;
+  const today = new Date().toDateString();
+  if(state.lastCompleteDate !== today){
+    state.streak += 1;
+  }
+  state.lastCompleteDate = today;
+  state.day += 1;
+  saveState();
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+render();
+</script>
+</body>
+</html>
